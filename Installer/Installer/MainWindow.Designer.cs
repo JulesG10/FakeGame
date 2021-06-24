@@ -79,6 +79,7 @@ namespace Installer
             this.Controls.Add(this.fileLoadingName);
             this.Controls.Add(this.RessourcesprogressBar);
             this.Name = "MainWindow";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "GameInstaller";
             this.Load += new System.EventHandler(this.MainWindow_Load);
             ((System.ComponentModel.ISupportInitialize)(this.GamepictureBox)).EndInit();

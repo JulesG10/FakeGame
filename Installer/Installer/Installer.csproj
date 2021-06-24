@@ -2,9 +2,19 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net5.0-windows</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>appkey.pfx</AssemblyOriginatorKeyFile>
+    <ApplicationIcon />
+    <StartupObject>Installer.Program</StartupObject>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <NeutralLanguage>en</NeutralLanguage>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>

