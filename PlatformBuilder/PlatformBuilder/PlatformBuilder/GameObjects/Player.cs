@@ -11,7 +11,7 @@ namespace PlatformBuilder.GameObjects
     {
         public Player(Vector2 winSize) : base(winSize)
         {
-            this.size = new Vector2(50, 50);
+            this.size = new Vector2(120, 200);
             this.position = new Vector2(winSize.X/2 - 25, winSize.Y/2 - 25);
         }
 
@@ -45,11 +45,11 @@ namespace PlatformBuilder.GameObjects
 
         public override bool Draw(SpriteBatch spriteBatch, GraphicsDeviceManager graphicsDeviceManager, Camera mainCamera, GameData gameData)
         {
-            /*
+            
             spriteBatch.Begin();
-            spriteBatch.Draw(rect, this.position, Color.White);
+            spriteBatch.Draw(gameData.playerTextures[0],Utils.ToRectangle(this.position,this.size), Color.White);
             spriteBatch.End();
-            */
+            
 
             return true;
         }

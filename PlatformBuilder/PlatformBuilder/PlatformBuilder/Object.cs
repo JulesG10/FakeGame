@@ -53,7 +53,6 @@ namespace PlatformBuilder.GameObjects
             this.position = position;
 
             this.camera = new Camera(winSize, this.position);
-            this.camera.states = CameraStates.ObjectCenterFocus;
             this.camera.position = new Vector2(0, 0);
         }
 

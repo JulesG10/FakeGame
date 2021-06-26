@@ -5,16 +5,10 @@ using Microsoft.Xna.Framework.Input;
 
 namespace PlatformBuilder.GameObjects
 {
-    enum CameraStates
-    {
-        PointFixed,
-        ObjectCenterFocus,
-    }
 
     class Camera
     {
-        public CameraStates states { get; set; } = CameraStates.ObjectCenterFocus;
-        public Vector2 size { get; private set; }
+        public Vector2 size { get;  set; }
         public Vector2 position { get; set; }
 
         public Camera(Vector2 size, Vector2 position)
