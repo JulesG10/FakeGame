@@ -35,9 +35,7 @@ namespace PlatformBuilder.GameObjects
         {
             if(base.Draw(spriteBatch, graphicsDeviceManager, mainCamera, gameData))
             {
-                spriteBatch.Begin();
                     spriteBatch.Draw(gameData.itemTextures[(int)this.type], Utils.ToRectangle(this.GetPosition(mainCamera), this.size) , Color.White);
-                spriteBatch.End();
                 
                 return true;
             }

@@ -61,6 +61,7 @@ namespace PlatformBuilder.GameObjects
             return new Vector2(this.position.X - mainCamera.position.X, this.position.Y - mainCamera.position.Y);
         }
 
+
         public virtual bool AABB(Object obj)
         {
             if (obj.position.X < this.position.X + this.size.X && obj.position.X + obj.size.X > this.position.X && obj.position.Y < this.position.Y + this.size.Y && obj.size.Y + obj.position.Y > this.position.Y)

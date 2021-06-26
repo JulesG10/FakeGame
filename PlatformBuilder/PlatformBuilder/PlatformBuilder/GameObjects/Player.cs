@@ -12,13 +12,13 @@ namespace PlatformBuilder.GameObjects
         public Player(Vector2 winSize) : base(winSize)
         {
             this.size = new Vector2(120, 200);
-            this.position = new Vector2(winSize.X/2 - 25, winSize.Y/2 - 25);
+            this.position = new Vector2(winSize.X/2 - this.size.X/2, winSize.Y/2 - this.size.Y / 2);
         }
 
 
         public override void Update(float deltatime)
         {
-            float moveSpeed = deltatime * 100;
+            float moveSpeed = deltatime * 1200;
             Vector2 velocity = this.camera.position;
 
             if (Keyboard.GetState().IsKeyDown(Keys.Up))
@@ -45,12 +45,7 @@ namespace PlatformBuilder.GameObjects
 
         public override bool Draw(SpriteBatch spriteBatch, GraphicsDeviceManager graphicsDeviceManager, Camera mainCamera, GameData gameData)
         {
-            
-            spriteBatch.Begin();
             spriteBatch.Draw(gameData.playerTextures[0],Utils.ToRectangle(this.position,this.size), Color.White);
-            spriteBatch.End();
-            
-
             return true;
         }
     }

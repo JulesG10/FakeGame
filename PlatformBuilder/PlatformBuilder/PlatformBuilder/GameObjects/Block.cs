@@ -34,13 +34,12 @@ namespace PlatformBuilder.GameObjects
         {
             if (base.Draw(spriteBatch, graphicsDeviceManager, mainCamera, gameData))
             {
-                spriteBatch.Begin();
                 spriteBatch.Draw(gameData.groundTextures[(int)this.type], Utils.ToRectangle(this.GetPosition(mainCamera), this.size), Color.White);
-                spriteBatch.End();
-
                 return true;
             }
-            return false;
+           
+
+            return true;
         }
     }
 }

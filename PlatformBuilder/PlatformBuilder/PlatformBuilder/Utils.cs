@@ -60,12 +60,10 @@ namespace PlatformBuilder.GameObjects
                 _pointTexture = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
                 _pointTexture.SetData<Color>(new Color[] { Color.White });
             }
-            spriteBatch.Begin();
             spriteBatch.Draw(_pointTexture, new Rectangle(rectangle.X, rectangle.Y, lineWidth, rectangle.Height + lineWidth), color);
             spriteBatch.Draw(_pointTexture, new Rectangle(rectangle.X, rectangle.Y, rectangle.Width + lineWidth, lineWidth), color);
             spriteBatch.Draw(_pointTexture, new Rectangle(rectangle.X + rectangle.Width, rectangle.Y, lineWidth, rectangle.Height + lineWidth), color);
             spriteBatch.Draw(_pointTexture, new Rectangle(rectangle.X, rectangle.Y + rectangle.Height, rectangle.Width + lineWidth, lineWidth), color);
-            spriteBatch.End();
         }
 
         public static void DrawGrid(SpriteBatch spriteBatch,Vector2 size,Color color,int lineWidth)
@@ -75,7 +73,6 @@ namespace PlatformBuilder.GameObjects
                 _pointTexture = new Texture2D(spriteBatch.GraphicsDevice, 1, 1);
                 _pointTexture.SetData<Color>(new Color[] { Color.White });
             }
-            spriteBatch.Begin();
 
             for (int i = 0; i < size.X; i += 100)
             {
@@ -83,10 +80,9 @@ namespace PlatformBuilder.GameObjects
             }
             for (int i = 0; i < size.X; i += 100)
             {
-                spriteBatch.Draw(_pointTexture, new Rectangle(i, 0, lineWidth, (int)size.Y), color);
+                spriteBatch.Draw(_pointTexture, new Rectangle(i,0, lineWidth, (int)size.Y), color);
             }
 
-            spriteBatch.End();
         }
     }
 }
