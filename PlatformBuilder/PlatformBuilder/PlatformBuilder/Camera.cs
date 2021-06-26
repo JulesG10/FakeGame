@@ -5,14 +5,13 @@ using Microsoft.Xna.Framework.Input;
 
 namespace PlatformBuilder.GameObjects
 {
-    public enum CameraStates
+    enum CameraStates
     {
         PointFixed,
         ObjectCenterFocus,
-        ObjectFocus
     }
 
-    public class Camera
+    class Camera
     {
         public CameraStates states { get; set; } = CameraStates.ObjectCenterFocus;
         public Vector2 size { get; private set; }
@@ -32,5 +31,6 @@ namespace PlatformBuilder.GameObjects
             }
             return false;
         }
+
     }
 }
