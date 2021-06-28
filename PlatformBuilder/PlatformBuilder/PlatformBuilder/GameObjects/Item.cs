@@ -26,9 +26,9 @@ namespace PlatformBuilder.GameObjects
         }
 
 
-        public override void Update(float deltatime)
+        public override void Update(float deltatime, GameData gameData)
         {
-            base.Update(deltatime);
+            base.Update(deltatime, gameData);
         }
 
         public override bool Draw(SpriteBatch spriteBatch, GraphicsDeviceManager graphicsDeviceManager, Camera mainCamera, GameData gameData)

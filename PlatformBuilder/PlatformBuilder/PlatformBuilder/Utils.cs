@@ -7,25 +7,34 @@ using Microsoft.Xna.Framework.Input;
 
 namespace PlatformBuilder.GameObjects
 {
+    enum Direction
+    {
+        TOP,
+        BOTTOM,
+        LEFT,
+        RIGHT,
+        NONE
+    }
+
     class Utils
     {
-        public static List<Texture2D> GetTextures(ContentManager Content, string id, int length)
+        public static List<T> LoadList<T>(ContentManager Content, string id, int length)
         {
-            List<Texture2D> textures2D = new List<Texture2D>();
+            List<T> textures2D = new List<T>();
             for (int i = 0; i < length; i++)
             {
-                textures2D.Add(Content.Load<Texture2D>(id + i.ToString()));
+                textures2D.Add(Content.Load<T>(id + i.ToString()));
             }
 
             return textures2D;
         }
 
-        public static List<Texture2D> GetTextures(ContentManager Content, string[] texturesID)
+        public static List<T> LoadList<T>(ContentManager Content, string[] texturesID)
         {
-            List<Texture2D> textures2D = new List<Texture2D>();
+            List<T> textures2D = new List<T>();
             for (int i = 0; i < texturesID.Length; i++)
             {
-                textures2D.Add(Content.Load<Texture2D>(texturesID[i]));
+                textures2D.Add(Content.Load<T>(texturesID[i]));
             }
 
             return textures2D;
@@ -36,11 +45,11 @@ namespace PlatformBuilder.GameObjects
             return new Rectangle(new Point((int)position.X, (int)position.Y), new Point((int)size.X, (int)size.Y));
         }
 
-        public static void ListUpdate(List<Object> objs, float deltatime)
+        public static void ListUpdate(List<Object> objs, float deltatime,GameData gameData)
         {
             for (int i = 0; i < objs.Count; i++)
             {
-                objs[i].Update(deltatime);
+                objs[i].Update(deltatime, gameData);
             }
         }
 
@@ -50,6 +59,48 @@ namespace PlatformBuilder.GameObjects
             {
                 objs[i].Draw(spriteBatch, graphicsDeviceManager, mainCamera, gameData);
             }
+        }
+
+        public static bool AABB(Vector2 p1,Vector2 s1,Vector2 p2,Vector2 s2)
+        {
+            if (p1.X < p2.X + s2.X && p1.X + s1.X > p2.X && p1.Y < p2.Y + s2.Y && s1.Y + p1.Y > p2.Y)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        public static Direction[] AABBDirection(Vector2 p1, Vector2 s1, Vector2 p2, Vector2 s2)
+        {
+            Direction[] dir = { Direction.NONE,Direction.NONE };
+            float p1b = p1.Y + s1.Y;
+            float p2b = p2.Y + s2.Y;
+            float p1r = p1.X + s1.X;
+            float p2r = p2.X + s2.X;
+
+            int b_collision = (int)((int)p2b - p1.Y);
+            int t_collision = (int)((int)p1b - p2.Y);
+            int l_collision = (int)((int)p1r - p2.X);
+            int r_collision = (int)((int)p2r - p1.X);
+
+            if (t_collision < b_collision && t_collision < l_collision && t_collision < r_collision)
+            {
+                dir[0] = Direction.TOP;
+            }
+            if (b_collision < t_collision && b_collision < l_collision && b_collision < r_collision)
+            {
+                dir[0] = Direction.BOTTOM;
+            }
+            if (l_collision < r_collision && l_collision < t_collision && l_collision < b_collision)
+            {
+                dir[1] = Direction.LEFT;
+            }
+            if (r_collision < l_collision && r_collision < t_collision && r_collision < b_collision)
+            {
+                dir[1] = Direction.RIGHT;
+            }
+
+            return dir;
         }
 
         private static Texture2D _pointTexture;
@@ -74,11 +125,11 @@ namespace PlatformBuilder.GameObjects
                 _pointTexture.SetData<Color>(new Color[] { Color.White });
             }
 
-            for (int i = 0; i < size.X; i += 100)
+            for (int i = 0; i < size.X; i += MainGame.tileSize)
             {
                 spriteBatch.Draw(_pointTexture, new Rectangle(0, i, (int)size.X, lineWidth), color);
             }
-            for (int i = 0; i < size.X; i += 100)
+            for (int i = 0; i < size.X; i += MainGame.tileSize)
             {
                 spriteBatch.Draw(_pointTexture, new Rectangle(i,0, lineWidth, (int)size.Y), color);
             }

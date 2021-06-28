@@ -17,7 +17,7 @@ namespace PlatformBuilder.GameObjects
 
         public Block(Vector2 winSize, Vector2 position, BlockType type) : base(winSize)
         {
-            this.size = new Vector2(100, 100);
+            this.size = new Vector2(MainGame.tileSize, MainGame.tileSize);
             this.type = type;
             this.position = position;
             this.camera.size = this.size;
@@ -25,9 +25,9 @@ namespace PlatformBuilder.GameObjects
         }
 
 
-        public override void Update(float deltatime)
+        public override void Update(float deltatime, GameData gameData)
         {
-            base.Update(deltatime);
+            base.Update(deltatime, gameData);
         }
 
         public override bool Draw(SpriteBatch spriteBatch, GraphicsDeviceManager graphicsDeviceManager, Camera mainCamera, GameData gameData)
@@ -35,6 +35,7 @@ namespace PlatformBuilder.GameObjects
             if (base.Draw(spriteBatch, graphicsDeviceManager, mainCamera, gameData))
             {
                 spriteBatch.Draw(gameData.groundTextures[(int)this.type], Utils.ToRectangle(this.GetPosition(mainCamera), this.size), Color.White);
+                
                 return true;
             }
            

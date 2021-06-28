@@ -145,6 +145,12 @@
 /processorParam:TextureFormat=Color
 /build:animations/tnt/tnt_4.png
 
+#begin effects/test.fx
+/importer:EffectImporter
+/processor:EffectProcessor
+/processorParam:DebugMode=Auto
+/build:effects/test.fx
+
 #begin font.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
