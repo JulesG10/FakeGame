@@ -19,6 +19,8 @@ namespace PlatformBuilder
 
         public Texture2D[] R_playerTextures;
         public Texture2D[] L_playerTextures;
+        public Texture2D[] R_playerJumpTextures;
+        public Texture2D[] L_playerJumpTextures;
         public Player player;
 
         public List<Object> items = new List<Object>();

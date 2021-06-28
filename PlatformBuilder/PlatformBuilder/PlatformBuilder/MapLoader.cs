@@ -5,38 +5,29 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.IO;
 using System.Text;
+using System.Collections.Generic;
+using PlatformBuilder.GameObjects;
 
 namespace PlatformBuilder
 {
-    class LevelLoader
+    class MapLoader
     {
         private string folderpath;
 
-        public LevelLoader(string path)
+        public MapLoader(string path)
         {
             this.folderpath = path;
         }
 
-        public Level Load(string name)
+        public void Load(string name)
         {
-            Level level = new Level();
             string path = Path.Combine(this.folderpath, name);
             if (File.Exists(path))
             {
                 byte[] levelData = File.ReadAllBytes(path);
                 string[] levelStr = Encoding.UTF8.GetString(levelData).Split('\n');
             }
-
-            return level;
         }
-        
-    }
 
-    class Level
-    {
-        public Vector2 position;
-
-        public Object[] items;
-        public Object[] blocks;
     }
 }

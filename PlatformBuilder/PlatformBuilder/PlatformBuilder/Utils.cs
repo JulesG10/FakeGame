@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -18,6 +19,7 @@ namespace PlatformBuilder.GameObjects
 
     class Utils
     {
+
         public static List<T> LoadList<T>(ContentManager Content, string id, int length)
         {
             List<T> textures2D = new List<T>();
@@ -75,13 +77,15 @@ namespace PlatformBuilder.GameObjects
             Direction[] dir = { Direction.NONE,Direction.NONE };
             float p1b = p1.Y + s1.Y;
             float p2b = p2.Y + s2.Y;
+
             float p1r = p1.X + s1.X;
             float p2r = p2.X + s2.X;
 
-            int b_collision = (int)Math.Floor(p2b - p1.Y);
-            int t_collision = (int)Math.Floor(p1b - p2.Y);
-            int l_collision = (int)Math.Floor(p1r - p2.X);
-            int r_collision = (int)Math.Floor(p2r - p1.X);
+            int b_collision = (int)Math.Floor(p2b - p1.Y) - 1;
+            int t_collision = (int)Math.Floor(p1b - p2.Y) - 1;
+
+            int l_collision = (int)Math.Floor(p1r - p2.X) - 1;
+            int r_collision = (int)Math.Floor(p2r - p1.X) - 1;
 
             if (t_collision < b_collision && t_collision < l_collision && t_collision < r_collision)
             {
@@ -91,6 +95,7 @@ namespace PlatformBuilder.GameObjects
             {
                 dir[0] = Direction.BOTTOM;
             }
+            
             if (l_collision < r_collision && l_collision < t_collision && l_collision < b_collision)
             {
                 dir[1] = Direction.LEFT;
@@ -134,6 +139,61 @@ namespace PlatformBuilder.GameObjects
                 spriteBatch.Draw(_pointTexture, new Rectangle(i,0, lineWidth, (int)size.Y), color);
             }
 
+        }
+
+        public static void RandomBlockGenerator(ref GameData gameData, int startX, int endX)
+        {
+            int index = 0;
+            bool lastNone = false;
+
+            for (int i = startX; i < endX; i++)
+            {
+                Random random = new Random();
+                if (random.Next(0, 6) != 0)
+                {
+                    int add = 0;
+                    if(random.Next(0, 8) == 0)
+                    {
+                        add = MainGame.tileSize;
+                    }
+                    Vector2 position = new Vector2(i * MainGame.tileSize, (gameData.windowSize.Y / 2 + (MainGame.tileSize * 2)-add));
+                    if (random.Next(0, 12) == 0)
+                    {
+                        gameData.items.Add(new Item(gameData.windowSize, new Vector2(position.X, position.Y - 25), ItemType.ROCK_BLOCK));
+                    }
+
+                    if (lastNone)
+                    {
+                        lastNone = false;
+                        gameData.blocks.Add(new Block(gameData.windowSize, position, BlockType.GROUND_END_LEFT));
+                    }
+                    else
+                    {
+                        gameData.blocks.Add(new Block(gameData.windowSize, position, BlockType.GROUND));
+                    }
+
+                    index++;
+                }
+                else
+                {
+                    lastNone = true;
+                    if (index - 1 >= 0 && gameData.blocks[index - 1] != null)
+                    {
+                        Block b = (Block)gameData.blocks[index - 1];
+
+                        if (b.type == BlockType.GROUND_END_LEFT)
+                        {
+                            b.type = BlockType.GROUND_NO_GRASS;
+                        }
+                        else
+                        {
+                            b.type = BlockType.GROUND_END_RIGHT;
+                        }
+
+                        gameData.blocks[index - 1] = b;
+                    }
+                }
+            }
         }
     }
 }

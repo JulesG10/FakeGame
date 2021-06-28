@@ -20,27 +20,37 @@ namespace PlatformBuilder.GameObjects
         W_1,
         W_2,
         W_3,
-        W_4
+        W_4,
+    }
 
+    enum PlayerJump
+    {
+        J1,
+        J2,
+        J3,
+        J4
     }
 
     class Player : Object
     {
         public Direction playerDirection { get; private set; } = Direction.RIGHT;
-        private PlayerJumpStates jumpStates = PlayerJumpStates.BOTTOM;
-        private PlayerWalk playerState = PlayerWalk.STATIC_1;
-        private float jumpTime = 0;
-        private float moveSpeed = 300;
-        private float jumpSpeed = 500;
-        private float MaxJumpTime = 50;
-        private float playerSwitchTime = 0;
-        private float playerMaxSwitch = 20;
-        private float jumpWait = 0;
-        private float jumpEndWait = 50;
+        public PlayerJumpStates jumpStates { get; private set; } = PlayerJumpStates.BOTTOM;
+        public PlayerWalk playerState { get; private set; } = PlayerWalk.STATIC_1;
+        public PlayerJump playerJumpState { get; private set; } = PlayerJump.J1;
+
+        public float jumpTime { get; private set; } = 0;
+        public float moveSpeed { get; private set; } = 300;
+        public float jumpSpeed { get; private set; } = 500;
+        public float MaxJumpTime { get; private set; } = 40;
+        public float playerSwitchTime { get; private set; } = 0;
+        public float playerMaxSwitch { get; private set; } = 20;
+        public float jumpWait { get; private set; } = 0;
+        public float jumpEndWait { get; private set; } = 50;
+        public bool canJump { get; private set; } = true;
 
         public Player(Vector2 winSize) : base(winSize)
         {
-            this.size = new Vector2(200,200);
+            this.size = new Vector2(200, 200);
             this.position = new Vector2(winSize.X / 2 - this.size.X / 2, winSize.Y / 2 - this.size.Y / 2);
         }
 
@@ -60,15 +70,88 @@ namespace PlatformBuilder.GameObjects
                 velocity.X += deltatime * moveSpeed;
             }
 
-            
-            if(this.jumpStates == PlayerJumpStates.BOTTOM)
+            this.CheckBlockCollision(deltatime, gameData, ref velocity, false);
+            this.JumpAction(deltatime, ref velocity);
+            this.CheckBlockCollision(deltatime, gameData, ref velocity, true);
+            this.UpdateState(velocity, gameData);
+
+            this.camera.position = velocity;
+            base.Update(deltatime, gameData);
+        }
+
+        private void UpdateState(Vector2 velocity, GameData gameData)
+        {
+            if (this.playerSwitchTime >= this.playerMaxSwitch)
+            {
+                this.playerSwitchTime = 0;
+                if (this.jumpStates == PlayerJumpStates.BOTTOM)
+                {
+                    if (this.camera.position.X == velocity.X)
+                    {
+                        if (this.playerState != PlayerWalk.STATIC_1)
+                        {
+                            this.playerState = PlayerWalk.STATIC_1;
+                        }
+                        else
+                        {
+                            this.playerState = PlayerWalk.STATIC_2;
+                        }
+                    }
+                    else
+                    {
+                        int state = (int)this.playerState;
+                        if (state > 1)
+                        {
+                            state++;
+                        }
+                        else
+                        {
+                            state = 2;
+                        }
+
+                        if (state >= gameData.L_playerTextures.Length)
+                        {
+                            state = 2;
+                        }
+
+                        this.playerState = (PlayerWalk)state;
+                    }
+                }
+                else
+                {
+                    int state = (int)this.playerJumpState;
+                    state++;
+                    if (state >= gameData.L_playerJumpTextures.Length)
+                    {
+                        state = 0;
+                    }
+
+                    this.playerJumpState = (PlayerJump)state;
+                }
+            }
+        }
+
+        private Vector2 getPositionHitBox(Vector2 position)
+        {
+            return new Vector2(position.X + (this.size.X - this.getSizeHitBox().X) / 2, position.Y);
+        }
+
+        private Vector2 getSizeHitBox()
+        {
+            return new Vector2(40, 200);
+        }
+
+
+        private void JumpAction(float deltatime, ref Vector2 velocity)
+        {
+            if (this.jumpStates == PlayerJumpStates.BOTTOM)
             {
                 velocity.Y += deltatime * this.jumpSpeed;
             }
-            else if(this.jumpStates == PlayerJumpStates.TOP)
+            else if (this.jumpStates == PlayerJumpStates.TOP)
             {
                 this.jumpTime += deltatime * 100;
-                if(this.jumpTime > this.MaxJumpTime)
+                if (this.jumpTime > this.MaxJumpTime)
                 {
                     this.jumpTime = 0;
                     this.jumpStates = PlayerJumpStates.BOTTOM;
@@ -79,106 +162,54 @@ namespace PlatformBuilder.GameObjects
                 }
             }
 
-            this.JumpAction(deltatime, ref velocity);
-            this.CheckBlockCollision(deltatime, gameData, ref velocity);
-            this.UpdateState(velocity, gameData.L_playerTextures.Length);
-
-            this.camera.position = velocity;
-           
-            base.Update(deltatime, gameData);
-        }
-
-        private void UpdateState(Vector2 velocity,int texturesLength)
-        {
-            if (this.playerSwitchTime >= this.playerMaxSwitch)
-            {
-                this.playerSwitchTime = 0;
-                if (this.camera.position.X == velocity.X)
-                {
-                    if (this.playerState != PlayerWalk.STATIC_1)
-                    {
-                        this.playerState = PlayerWalk.STATIC_1;
-                    }
-                    else
-                    {
-                        this.playerState = PlayerWalk.STATIC_2;
-                    }
-                }
-                else
-                {
-                    int state = (int)this.playerState;
-                    if (state > 1)
-                    {
-                        state++;
-                    }
-                    else
-                    {
-                        state = 2;
-                    }
-
-                    if (state >= texturesLength)
-                    {
-                        state = 2;
-                    }
-
-                    this.playerState = (PlayerWalk)state;
-                }
-            }
-        }
-
-        private Vector2 getPositionHitBox(Vector2 position)
-        {
-            return new Vector2(position.X + (this.size.X - this.getSizeHitBox().X)/2, position.Y);
-        }
-
-        private Vector2 getSizeHitBox()
-        {
-            return new Vector2(80, 200);
-        }
-
-        
-        private void JumpAction(float deltatime,ref Vector2 velocity)
-        {
             if (Keyboard.GetState().IsKeyDown(Keys.Space))
             {
-                if(this.jumpStates  == PlayerJumpStates.BOTTOM && this.jumpWait >= this.jumpEndWait)
+                if (canJump && this.jumpStates == PlayerJumpStates.BOTTOM && this.jumpWait >= this.jumpEndWait)
                 {
+                    canJump = false;
                     this.jumpWait = 0;
                     this.jumpStates = PlayerJumpStates.TOP;
                 }
             }
 
-            if(this.jumpStates == PlayerJumpStates.BOTTOM)
+            if (this.jumpStates == PlayerJumpStates.BOTTOM)
             {
                 this.jumpWait += deltatime * 100;
             }
         }
 
-        private void CheckBlockCollision(float deltatime, GameData gameData, ref Vector2 velocity)
+        private void CheckBlockCollision(float deltatime, GameData gameData, ref Vector2 velocity, bool y)
         {
             for (int i = 0; i < gameData.blocks.Count; i++)
             {
                 if (Utils.AABB(this.GetStaticPosition(this.getPositionHitBox(velocity)), this.getSizeHitBox(), gameData.blocks[i].position, gameData.blocks[i].size))
                 {
+
                     Direction[] dir = Utils.AABBDirection(this.GetStaticPosition(this.getPositionHitBox(velocity)), this.getSizeHitBox(), gameData.blocks[i].position, gameData.blocks[i].size);
+                    if (y)
+                    {
+                        if (dir[0] == Direction.TOP)
+                        {
+                            velocity.Y -= Math.Abs(gameData.blocks[i].position.Y - (this.GetStaticPosition(this.getPositionHitBox(velocity)).Y + this.getSizeHitBox().Y)) + 1;
+                            canJump = true;
+                        }
+                        else if (dir[0] == Direction.BOTTOM)
+                        {
+                            velocity.Y += Math.Abs((gameData.blocks[i].position.Y + gameData.blocks[i].size.Y) - this.GetStaticPosition(this.getPositionHitBox(velocity)).Y);
+                        }
+                    }
+                    else
+                    {
+                        if (dir[1] == Direction.RIGHT)
+                        {
+                            velocity.X += Math.Abs((gameData.blocks[i].position.X + gameData.blocks[i].size.X) - this.GetStaticPosition(this.getPositionHitBox(velocity)).X);
+                        }
+                        else if (dir[1] == Direction.LEFT)
+                        {
+                            velocity.X -= Math.Abs(gameData.blocks[i].position.X - (this.GetStaticPosition(this.getPositionHitBox(velocity)).X + this.getSizeHitBox().X));
+                        }
+                    }
 
-                    if (dir[0] == Direction.TOP)
-                    {
-                        velocity.Y -= deltatime * this.jumpSpeed;
-                    }
-                    else if (dir[0] == Direction.BOTTOM)
-                    {
-                        velocity.Y += deltatime * this.jumpSpeed;
-                    }
-
-                    if (dir[1] == Direction.RIGHT)
-                    {
-                        velocity.X += deltatime * this.moveSpeed;
-                    }
-                    else if (dir[1] == Direction.LEFT)
-                    {
-                        velocity.X -= deltatime * this.moveSpeed;
-                    }
 
                 }
             }
@@ -187,20 +218,39 @@ namespace PlatformBuilder.GameObjects
 
         public Rectangle MarginEffect(int margin)
         {
-           return Utils.ToRectangle(new Vector2(this.position.X, this.position.Y), new Vector2(this.size.X,this.size.Y + margin));
+            return Utils.ToRectangle(new Vector2(this.position.X, this.position.Y), new Vector2(this.size.X, this.size.Y + margin));
+        }
+
+        public Texture2D getDrawTexture(GameData gameData)
+        {
+            if (this.playerDirection == Direction.RIGHT)
+            {
+                if (this.jumpStates == PlayerJumpStates.TOP)
+                {
+                    return gameData.R_playerJumpTextures[(int)this.playerJumpState];
+                }
+                else
+                {
+                    return gameData.R_playerTextures[(int)playerState];
+                }
+            }
+            else
+            {
+                if (this.jumpStates == PlayerJumpStates.TOP)
+                {
+                    return gameData.L_playerJumpTextures[(int)this.playerJumpState];
+                }
+                else
+                {
+                    return gameData.L_playerTextures[(int)playerState];
+                }
+            }
         }
 
         public override bool Draw(SpriteBatch spriteBatch, GraphicsDeviceManager graphicsDeviceManager, Camera mainCamera, GameData gameData)
         {
-            if(this.playerDirection == Direction.RIGHT)
-            {
-                spriteBatch.Draw(gameData.R_playerTextures[(int)playerState],this.MarginEffect(5), Color.White);// Utils.ToRectangle(this.position, this.size), Color.White);
-            }
-            else
-            {
-                spriteBatch.Draw(gameData.L_playerTextures[(int)playerState],this.MarginEffect(5), Color.White);// Utils.ToRectangle(this.position, this.size), Color.White);
-            }
-           
+            spriteBatch.Draw(this.getDrawTexture(gameData), this.MarginEffect(5), Color.White);// Utils.ToRectangle(this.position, this.size), Color.White);
+            Utils.DrawRectangle(spriteBatch, Utils.ToRectangle(this.getPositionHitBox(this.position), this.getSizeHitBox()), Color.Red, 1);
             return true;
         }
     }
