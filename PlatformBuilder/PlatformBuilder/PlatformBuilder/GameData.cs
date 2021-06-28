@@ -17,7 +17,8 @@ namespace PlatformBuilder
         public Dictionary<int, Texture2D[]> animationsTextures = new Dictionary<int, Texture2D[]>();
         public SpriteFont font;
 
-        public Texture2D[] playerTextures;
+        public Texture2D[] R_playerTextures;
+        public Texture2D[] L_playerTextures;
         public Player player;
 
         public List<Object> items = new List<Object>();

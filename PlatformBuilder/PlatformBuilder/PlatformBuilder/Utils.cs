@@ -78,10 +78,10 @@ namespace PlatformBuilder.GameObjects
             float p1r = p1.X + s1.X;
             float p2r = p2.X + s2.X;
 
-            int b_collision = (int)((int)p2b - p1.Y);
-            int t_collision = (int)((int)p1b - p2.Y);
-            int l_collision = (int)((int)p1r - p2.X);
-            int r_collision = (int)((int)p2r - p1.X);
+            int b_collision = (int)Math.Floor(p2b - p1.Y);
+            int t_collision = (int)Math.Floor(p1b - p2.Y);
+            int l_collision = (int)Math.Floor(p1r - p2.X);
+            int r_collision = (int)Math.Floor(p2r - p1.X);
 
             if (t_collision < b_collision && t_collision < l_collision && t_collision < r_collision)
             {
