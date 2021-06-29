@@ -13,6 +13,7 @@ namespace PlatformBuilder
         public Texture2D[] groundTextures;
         public Texture2D[] itemTextures;
         public Texture2D[] iconTextures;
+        public Texture2D[] boxTextures;
         public Effect[] effects;
         public Dictionary<int, Texture2D[]> animationsTextures = new Dictionary<int, Texture2D[]>();
         public SpriteFont font;
@@ -25,6 +26,7 @@ namespace PlatformBuilder
 
         public List<Object> items = new List<Object>();
         public List<Object> blocks = new List<Object>();
+        public List<Object> boxs = new List<Object>();
 
         public GameData(Vector2 winSize)
         {

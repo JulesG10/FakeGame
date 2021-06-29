@@ -25,8 +25,7 @@ namespace PlatformBuilder.GameObjects
 
         public override bool Draw(SpriteBatch spriteBatch, GraphicsDeviceManager graphicsDeviceManager, Camera mainCamera, GameData gameData)
         {
-            string playerInfo = gameData.player.canJump + "\n"+ gameData.player.jumpWait +"\n"+gameData.player.jumpTime;
-            spriteBatch.DrawString(gameData.font, playerInfo, new Vector2(10, 10), Color.White);
+            
             return true;
         }
     }

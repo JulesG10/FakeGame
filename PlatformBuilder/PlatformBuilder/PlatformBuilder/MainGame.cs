@@ -5,6 +5,7 @@ using PlatformBuilder.GameObjects;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading;
 
 namespace PlatformBuilder
 {
@@ -16,6 +17,7 @@ namespace PlatformBuilder
         private HUD hud;
         private bool showGrid = false;
         public static int tileSize = 100;
+
 
         public MainGame()
         {
@@ -32,8 +34,9 @@ namespace PlatformBuilder
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
             
-            IsFixedTimeStep = true;
-            TargetElapsedTime = System.TimeSpan.FromSeconds(1d / 30);
+            IsFixedTimeStep = false;
+            // if fps < 30 block collision bug
+            //TargetElapsedTime = System.TimeSpan.FromSeconds(1d / 30);
 
             this.gameData = new GameData(windowSize);
             this.hud = new HUD(windowSize);
@@ -54,14 +57,12 @@ namespace PlatformBuilder
 
             this.gameData.itemTextures = Utils.LoadList<Texture2D>(Content, "items/item_", 2).ToArray();
             this.gameData.iconTextures = Utils.LoadList<Texture2D>(Content, "icons/icon_", 3).ToArray();
-            this.gameData.groundTextures = Utils.LoadList<Texture2D>(Content, "ground/ground_", 4).ToArray();
+            this.gameData.groundTextures = Utils.LoadList<Texture2D>(Content, "ground/ground_", 5).ToArray();
             this.gameData.L_playerTextures = Utils.LoadList<Texture2D>(Content, "player/left/l_player_", 6).ToArray();
             this.gameData.R_playerTextures = Utils.LoadList<Texture2D>(Content, "player/right/r_player_", 6).ToArray();
             this.gameData.L_playerJumpTextures = Utils.LoadList<Texture2D>(Content, "player/jump/left/l_jump_", 4).ToArray();
             this.gameData.R_playerJumpTextures = Utils.LoadList<Texture2D>(Content, "player/jump/right/r_jump_", 4).ToArray();
-
-            this.gameData.animationsTextures.Add(0, Utils.LoadList<Texture2D>(Content, "animations/box/box_", 6).ToArray());
-            this.gameData.animationsTextures.Add(1, Utils.LoadList<Texture2D>(Content, "animations/tnt/tnt_", 5).ToArray());
+            this.gameData.boxTextures = Utils.LoadList<Texture2D>(Content, "animations/box/box_", 6).ToArray();
 
             string[] effects = { "effects/test" };
             this.gameData.effects = Utils.LoadList<Effect>(Content, effects).ToArray();
@@ -95,6 +96,7 @@ namespace PlatformBuilder
                 Exit();
             }
 
+
             if (Mouse.GetState().RightButton == ButtonState.Pressed)
             {
                 rightPress += deltatime * 1000;
@@ -109,10 +111,10 @@ namespace PlatformBuilder
             }
 
             this.gameData.player.Update(deltatime, this.gameData);
+            Utils.ListUpdate(this.gameData.boxs, deltatime, this.gameData);
 
             this.MaxDelta = Math.Max(this.MaxDelta, deltatime);
             base.Update(gameTime);
-
         }
 
         private bool activeHUD = true;
@@ -129,11 +131,14 @@ namespace PlatformBuilder
             this._spriteBatch.Begin();
 
             Camera mainCamera = this.gameData.player.camera;
-            this.gameData.player.Draw(this._spriteBatch, this._graphics, mainCamera, this.gameData);
 
             Utils.ListDraw(this.gameData.items, this._spriteBatch, this._graphics, mainCamera, this.gameData);
-            Utils.ListDraw(this.gameData.blocks, this._spriteBatch, this._graphics, mainCamera, this.gameData);
+            Utils.ListDraw(this.gameData.boxs, this._spriteBatch, this._graphics, mainCamera, this.gameData);
 
+            this.gameData.player.Draw(this._spriteBatch, this._graphics, mainCamera, this.gameData);
+
+            Utils.ListDraw(this.gameData.blocks, this._spriteBatch, this._graphics, mainCamera, this.gameData);
+           
 #if DEBUG
             
             if (Keyboard.GetState().IsKeyDown(Keys.I))
@@ -146,7 +151,7 @@ namespace PlatformBuilder
                 string info = "FPS: " + (1.0 / gameTime.ElapsedGameTime.TotalSeconds).ToString() +
                     "\n(" + (int)mainCamera.position.X + ";" + (int)mainCamera.position.Y +
                     ")\nTime: " + gameTime.TotalGameTime.TotalSeconds +
-                    "\nDeltatime: " + (float)gameTime.ElapsedGameTime.TotalSeconds +//gameTime.ElapsedGameTime.TotalSeconds +
+                    "\nDeltatime: " + gameTime.ElapsedGameTime.TotalSeconds +
                 "\nMax Delta: " + this.MaxDelta;
 
                 _spriteBatch.DrawString(this.gameData.font, info, new Vector2(10, 10), Color.White);

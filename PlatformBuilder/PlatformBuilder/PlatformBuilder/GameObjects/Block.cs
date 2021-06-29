@@ -11,7 +11,8 @@ namespace PlatformBuilder.GameObjects
         GROUND,
         GROUND_NO_GRASS,
         GROUND_END_LEFT,
-        GROUND_END_RIGHT
+        GROUND_END_RIGHT,
+        FILL_GROUND,
     }
 
     class Block : Object
@@ -38,8 +39,6 @@ namespace PlatformBuilder.GameObjects
             if (base.Draw(spriteBatch, graphicsDeviceManager, mainCamera, gameData))
             {
                 spriteBatch.Draw(gameData.groundTextures[(int)this.type], Utils.ToRectangle(this.GetPosition(mainCamera), this.size), Color.White);
-
-                Utils.DrawRectangle(spriteBatch, Utils.ToRectangle(this.GetPosition(mainCamera), this.size),new Color(Color.Green,50), 1);
                 return true;
             }
            

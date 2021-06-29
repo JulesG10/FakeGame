@@ -152,14 +152,21 @@ namespace PlatformBuilder.GameObjects
                 if (random.Next(0, 6) != 0)
                 {
                     int add = 0;
-                    if(random.Next(0, 8) == 0)
+                    if(!lastNone && random.Next(0, 8) == 0)
                     {
+                        gameData.blocks.Add(new Block(gameData.windowSize, new Vector2(i * MainGame.tileSize, (gameData.windowSize.Y / 2 + (MainGame.tileSize * 2))), BlockType.FILL_GROUND));
+                        index++;
                         add = MainGame.tileSize;
                     }
                     Vector2 position = new Vector2(i * MainGame.tileSize, (gameData.windowSize.Y / 2 + (MainGame.tileSize * 2)-add));
+                    
                     if (random.Next(0, 12) == 0)
                     {
                         gameData.items.Add(new Item(gameData.windowSize, new Vector2(position.X, position.Y - 25), ItemType.ROCK_BLOCK));
+                    }
+                    else if(random.Next(0,30) == 0)
+                    {
+                        gameData.boxs.Add(new Box(gameData.windowSize, new Vector2(position.X, position.Y - 90)));
                     }
 
                     if (lastNone)

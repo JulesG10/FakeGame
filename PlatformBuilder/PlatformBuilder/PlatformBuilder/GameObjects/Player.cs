@@ -46,7 +46,7 @@ namespace PlatformBuilder.GameObjects
         public float playerMaxSwitch { get; private set; } = 20;
         public float jumpWait { get; private set; } = 0;
         public float jumpEndWait { get; private set; } = 50;
-        public bool canJump { get; private set; } = true;
+        public bool canJump { get; private set; } = false;
 
         public Player(Vector2 winSize) : base(winSize)
         {
@@ -74,9 +74,25 @@ namespace PlatformBuilder.GameObjects
             this.JumpAction(deltatime, ref velocity);
             this.CheckBlockCollision(deltatime, gameData, ref velocity, true);
             this.UpdateState(velocity, gameData);
+            this.ItemAction(velocity, gameData);
 
             this.camera.position = velocity;
             base.Update(deltatime, gameData);
+        }
+
+        private void ItemAction(Vector2 velocity, GameData gameData)
+        {
+            for (int i = 0; i < gameData.boxs.Count; i++)
+            {
+                if (Utils.AABB(this.GetStaticPosition(this.getPositionHitBox(velocity)), this.getSizeHitBox(), gameData.boxs[i].position, gameData.boxs[i].size))
+                {
+                    Box b = (Box)gameData.boxs[i];
+                    if(b.Active())
+                    {
+                        gameData.boxs[i] = b;
+                    }
+                }
+            }
         }
 
         private void UpdateState(Vector2 velocity, GameData gameData)
@@ -190,12 +206,12 @@ namespace PlatformBuilder.GameObjects
                     {
                         if (dir[0] == Direction.TOP)
                         {
-                            velocity.Y -= Math.Abs(gameData.blocks[i].position.Y - (this.GetStaticPosition(this.getPositionHitBox(velocity)).Y + this.getSizeHitBox().Y)) + 1;
+                            velocity.Y -= deltatime * this.jumpSpeed; //Math.Abs(gameData.blocks[i].position.Y - (this.GetStaticPosition(this.getPositionHitBox(velocity)).Y + this.getSizeHitBox().Y)) + 1;
                             canJump = true;
                         }
                         else if (dir[0] == Direction.BOTTOM)
                         {
-                            velocity.Y += Math.Abs((gameData.blocks[i].position.Y + gameData.blocks[i].size.Y) - this.GetStaticPosition(this.getPositionHitBox(velocity)).Y);
+                            velocity.Y += deltatime * this.jumpSpeed;// Math.Abs((gameData.blocks[i].position.Y + gameData.blocks[i].size.Y) - this.GetStaticPosition(this.getPositionHitBox(velocity)).Y);
                         }
                     }
                     else
@@ -250,7 +266,6 @@ namespace PlatformBuilder.GameObjects
         public override bool Draw(SpriteBatch spriteBatch, GraphicsDeviceManager graphicsDeviceManager, Camera mainCamera, GameData gameData)
         {
             spriteBatch.Draw(this.getDrawTexture(gameData), this.MarginEffect(5), Color.White);// Utils.ToRectangle(this.position, this.size), Color.White);
-            Utils.DrawRectangle(spriteBatch, Utils.ToRectangle(this.getPositionHitBox(this.position), this.getSizeHitBox()), Color.Red, 1);
             return true;
         }
     }
