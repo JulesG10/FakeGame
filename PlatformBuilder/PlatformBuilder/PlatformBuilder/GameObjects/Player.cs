@@ -46,7 +46,9 @@ namespace PlatformBuilder.GameObjects
         public float playerMaxSwitch { get; private set; } = 20;
         public float jumpWait { get; private set; } = 0;
         public float jumpEndWait { get; private set; } = 50;
+        public float life { get; private set; } = 100.0f;
         public bool canJump { get; private set; } = false;
+        public bool isAlive { get; private set; } = true;
 
         public Player(Vector2 winSize) : base(winSize)
         {
@@ -206,6 +208,13 @@ namespace PlatformBuilder.GameObjects
                     {
                         if (dir[0] == Direction.TOP)
                         {
+                            Block b = (Block)gameData.blocks[i];
+                            if(b.type == BlockType.BORDER)
+                            {
+                                this.life = 0;
+                                this.isAlive = false;
+                                this.OnDestroy(this, new EventArgs());
+                            }
                             velocity.Y -= deltatime * this.jumpSpeed; //Math.Abs(gameData.blocks[i].position.Y - (this.GetStaticPosition(this.getPositionHitBox(velocity)).Y + this.getSizeHitBox().Y)) + 1;
                             canJump = true;
                         }

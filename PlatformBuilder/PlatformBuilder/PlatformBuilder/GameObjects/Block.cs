@@ -13,6 +13,7 @@ namespace PlatformBuilder.GameObjects
         GROUND_END_LEFT,
         GROUND_END_RIGHT,
         FILL_GROUND,
+        BORDER
     }
 
     class Block : Object

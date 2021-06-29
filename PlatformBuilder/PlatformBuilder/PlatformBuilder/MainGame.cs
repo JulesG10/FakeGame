@@ -42,7 +42,10 @@ namespace PlatformBuilder
             this.hud = new HUD(windowSize);
 
             Utils.RandomBlockGenerator(ref gameData, -200, 200);
-            
+            for(int i=-200;i<200;i++)
+            {
+                gameData.blocks.Add(new Block(gameData.windowSize, new Vector2(i * MainGame.tileSize, (gameData.windowSize.Y / 2 + (MainGame.tileSize * 20))), BlockType.BORDER));
+            }
         }
 
 
@@ -57,7 +60,7 @@ namespace PlatformBuilder
 
             this.gameData.itemTextures = Utils.LoadList<Texture2D>(Content, "items/item_", 2).ToArray();
             this.gameData.iconTextures = Utils.LoadList<Texture2D>(Content, "icons/icon_", 3).ToArray();
-            this.gameData.groundTextures = Utils.LoadList<Texture2D>(Content, "ground/ground_", 5).ToArray();
+            this.gameData.groundTextures = Utils.LoadList<Texture2D>(Content, "ground/ground_", 6).ToArray();
             this.gameData.L_playerTextures = Utils.LoadList<Texture2D>(Content, "player/left/l_player_", 6).ToArray();
             this.gameData.R_playerTextures = Utils.LoadList<Texture2D>(Content, "player/right/r_player_", 6).ToArray();
             this.gameData.L_playerJumpTextures = Utils.LoadList<Texture2D>(Content, "player/jump/left/l_jump_", 4).ToArray();
@@ -96,7 +99,7 @@ namespace PlatformBuilder
                 Exit();
             }
 
-
+            
             if (Mouse.GetState().RightButton == ButtonState.Pressed)
             {
                 rightPress += deltatime * 1000;
@@ -110,8 +113,11 @@ namespace PlatformBuilder
                 rightPress = 0;
             }
 
-            this.gameData.player.Update(deltatime, this.gameData);
-            Utils.ListUpdate(this.gameData.boxs, deltatime, this.gameData);
+            if (gameData.player.isAlive)
+            {
+                this.gameData.player.Update(deltatime, this.gameData);
+                Utils.ListUpdate(this.gameData.boxs, deltatime, this.gameData);
+            }
 
             this.MaxDelta = Math.Max(this.MaxDelta, deltatime);
             base.Update(gameTime);
@@ -120,27 +126,29 @@ namespace PlatformBuilder
         private bool activeHUD = true;
         private float MaxDelta = 0;
 
+
         protected override void Draw(GameTime gameTime)
         {
 
             GraphicsDevice.Clear(Color.Black);
             this._spriteBatch.GraphicsDevice.Clear(Color.Black);
 
-            //this._spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, SamplerState.PointClamp, DepthStencilState.Default, RasterizerState.CullNone);
+            this._spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.NonPremultiplied, SamplerState.PointClamp, DepthStencilState.Default, RasterizerState.CullNone);
             //this._spriteBatch.Begin(SpriteSortMode.Texture, BlendState.AlphaBlend, SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullCounterClockwise);
-            this._spriteBatch.Begin();
-
+            //this._spriteBatch.Begin();
             Camera mainCamera = this.gameData.player.camera;
 
-            Utils.ListDraw(this.gameData.items, this._spriteBatch, this._graphics, mainCamera, this.gameData);
-            Utils.ListDraw(this.gameData.boxs, this._spriteBatch, this._graphics, mainCamera, this.gameData);
+            if (gameData.player.isAlive)
+            {
+                Utils.ListDraw(this.gameData.items, this._spriteBatch, this._graphics, mainCamera, this.gameData);
+                Utils.ListDraw(this.gameData.boxs, this._spriteBatch, this._graphics, mainCamera, this.gameData);
 
-            this.gameData.player.Draw(this._spriteBatch, this._graphics, mainCamera, this.gameData);
+                this.gameData.player.Draw(this._spriteBatch, this._graphics, mainCamera, this.gameData);
 
-            Utils.ListDraw(this.gameData.blocks, this._spriteBatch, this._graphics, mainCamera, this.gameData);
-           
+                Utils.ListDraw(this.gameData.blocks, this._spriteBatch, this._graphics, mainCamera, this.gameData);
+            }
 #if DEBUG
-            
+
             if (Keyboard.GetState().IsKeyDown(Keys.I))
             {
                 activeHUD = !activeHUD;
