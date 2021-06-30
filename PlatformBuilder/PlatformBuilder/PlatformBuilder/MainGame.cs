@@ -41,7 +41,9 @@ namespace PlatformBuilder
             this.gameData = new GameData(windowSize);
             this.hud = new HUD(windowSize);
 
-            Utils.RandomBlockGenerator(ref gameData, -200, 200);
+            //Utils.RandomBlockGenerator(ref gameData, -200, 200);
+            Utils.ProceduralBlockGenerator(ref gameData, windowSize);
+            gameData.player.camera.position = gameData.blocks[0].position;//new Vector2(gameData.blocks[0].position.X, gameData.blocks[0].position.Y - gameData.player.size.Y*2);
 
             for (int i = -200; i < 200; i++)
             {
@@ -50,32 +52,9 @@ namespace PlatformBuilder
 
         }
 
-        private Vector2[] blocks;
         protected override void Initialize()
         {
             base.Initialize();
-            PerlinNoise perlinNoise = new PerlinNoise();
-            perlinNoise.SetDetail(10, 0.5);
-            blocks = perlinNoise.Generate2D(gameData.windowSize, 1,0,0.01,0.05,20);
-
-            /*
-             // Draw
-
-                        Vector2 last = new Vector2(-1, -1);
-            for (int i = 0; i < blocks.Length; i++)
-            {
-                Vector2 pos = new Vector2(((int)(blocks[i].X / tileSize) * tileSize), ((int)(blocks[i].Y / tileSize) * tileSize));
-                if (last == new Vector2(-1,-1))
-                {
-                    last = pos;
-                }
-                
-                Utils.DrawLine(this._spriteBatch, last, pos, Color.Red);
-                Utils.DrawRectangle(_spriteBatch, Utils.ToRectangle(pos, new Vector2(tileSize, tileSize)), Color.Blue, 1);
-
-                last = pos;
-            }
-             */
         }
 
         protected override void LoadContent()
@@ -149,7 +128,6 @@ namespace PlatformBuilder
 
         private bool activeHUD = true;
         private float MaxDelta = 0;
-
 
         protected override void Draw(GameTime gameTime)
         {

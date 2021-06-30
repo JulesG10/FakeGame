@@ -63,6 +63,37 @@ namespace PlatformBuilder.GameObjects
             }
         }
 
+        public static Vector2[] LineVector2(Vector2 p1,Vector2 p2,int lineWidth)
+        {
+            float dx = p2.X - p1.X;
+            float dy = p2.Y - p1.Y;
+
+            float x = p1.X;
+            float y = p1.Y;
+
+            float p = 2 * dy - dx;
+
+            List<Vector2> result = new List<Vector2>();
+
+            while (x < p2.X)
+            {
+                if (p >= 0)
+                {
+                    result.Add(new Vector2(x, y));
+                    y = y + 1;
+                    p = p + 2 * dy - 2 * dx;
+                }
+                else
+                {
+                    result.Add(new Vector2(x, y));
+                    p = p + 2 * dy;
+                }
+                x += lineWidth;
+            }
+
+            return result.ToArray();
+        }
+
         public static bool AABB(Vector2 p1,Vector2 s1,Vector2 p2,Vector2 s2)
         {
             if (p1.X < p2.X + s2.X && p1.X + s1.X > p2.X && p1.Y < p2.Y + s2.Y && s1.Y + p1.Y > p2.Y)
@@ -166,6 +197,33 @@ namespace PlatformBuilder.GameObjects
                 spriteBatch.Draw(_pointTexture, new Rectangle(i,0, lineWidth, (int)size.Y), color);
             }
 
+        }
+
+
+        public static void ProceduralBlockGenerator(ref GameData gameData,Vector2 mapSize)
+        {
+            PerlinNoise perlinNoise = new PerlinNoise();
+            perlinNoise.SetDetail(10, 0.5);
+            Vector2[] blocks = perlinNoise.Generate2D(mapSize, 1, 0, 0.01, 0.05, 20);
+
+            Vector2 last = new Vector2(-1, -1);
+            for (int i = 0; i < blocks.Length; i++)
+            {
+                Vector2 pos = new Vector2(((int)(blocks[i].X / MainGame.tileSize) * MainGame.tileSize), ((int)(blocks[i].Y / MainGame.tileSize) * MainGame.tileSize));
+                if (last == new Vector2(-1, -1))
+                {
+                    last = pos;
+                }
+
+                gameData.blocks.Add(new Block(gameData.windowSize, pos, BlockType.GROUND));
+                for(int k = 1;k<4;k++)
+                {
+                    gameData.blocks.Add(new Block(gameData.windowSize, new Vector2(pos.X, pos.Y + k * MainGame.tileSize), BlockType.FILL_GROUND));
+                }
+
+                //Utils.DrawRectangle(MainGame.tileSize, Utils.ToRectangle(pos, new Vector2(MainGame.tileSize, MainGame.tileSize)), Color.Green, 1);
+                last = pos;
+            }
         }
 
         public static void RandomBlockGenerator(ref GameData gameData, int startX, int endX)

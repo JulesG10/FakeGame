@@ -74,6 +74,11 @@ namespace PlatformBuilder.GameObjects
                 velocity.X += deltatime * moveSpeed;
             }
 
+            if (Keyboard.GetState().IsKeyDown(Keys.Up))
+            {
+                velocity.Y -= deltatime * jumpSpeed*2;
+            }
+
             this.CheckBlockCollision(deltatime, gameData, ref velocity, false);
             this.JumpAction(deltatime, ref velocity);
             this.CheckBlockCollision(deltatime, gameData, ref velocity, true);
