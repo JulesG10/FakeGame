@@ -33,7 +33,7 @@ namespace PlatformBuilder
 
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
-            
+
             IsFixedTimeStep = false;
             // if fps < 30 block collision bug
             //TargetElapsedTime = System.TimeSpan.FromSeconds(1d / 30);
@@ -42,16 +42,40 @@ namespace PlatformBuilder
             this.hud = new HUD(windowSize);
 
             Utils.RandomBlockGenerator(ref gameData, -200, 200);
-            for(int i=-200;i<200;i++)
+
+            for (int i = -200; i < 200; i++)
             {
                 gameData.blocks.Add(new Block(gameData.windowSize, new Vector2(i * MainGame.tileSize, (gameData.windowSize.Y / 2 + (MainGame.tileSize * 20))), BlockType.BORDER));
             }
+
         }
 
-
+        private Vector2[] blocks;
         protected override void Initialize()
         {
             base.Initialize();
+            PerlinNoise perlinNoise = new PerlinNoise();
+            perlinNoise.SetDetail(10, 0.5);
+            blocks = perlinNoise.Generate2D(gameData.windowSize, 1,0,0.01,0.05,20);
+
+            /*
+             // Draw
+
+                        Vector2 last = new Vector2(-1, -1);
+            for (int i = 0; i < blocks.Length; i++)
+            {
+                Vector2 pos = new Vector2(((int)(blocks[i].X / tileSize) * tileSize), ((int)(blocks[i].Y / tileSize) * tileSize));
+                if (last == new Vector2(-1,-1))
+                {
+                    last = pos;
+                }
+                
+                Utils.DrawLine(this._spriteBatch, last, pos, Color.Red);
+                Utils.DrawRectangle(_spriteBatch, Utils.ToRectangle(pos, new Vector2(tileSize, tileSize)), Color.Blue, 1);
+
+                last = pos;
+            }
+             */
         }
 
         protected override void LoadContent()
@@ -137,6 +161,7 @@ namespace PlatformBuilder
             //this._spriteBatch.Begin(SpriteSortMode.Texture, BlendState.AlphaBlend, SamplerState.LinearWrap, DepthStencilState.None, RasterizerState.CullCounterClockwise);
             //this._spriteBatch.Begin();
             Camera mainCamera = this.gameData.player.camera;
+
 
             if (gameData.player.isAlive)
             {

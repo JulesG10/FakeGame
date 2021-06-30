@@ -9,7 +9,8 @@ namespace PlatformBuilder.GameObjects
     enum ItemType
     {
         ROCK_BLOCK,
-        WOOD_BRIDGE
+        WOOD_BRIDGE,
+        NONE
     }
 
     class Item : Object

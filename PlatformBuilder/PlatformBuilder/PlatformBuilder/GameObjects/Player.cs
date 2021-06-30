@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -37,6 +38,7 @@ namespace PlatformBuilder.GameObjects
         public PlayerJumpStates jumpStates { get; private set; } = PlayerJumpStates.BOTTOM;
         public PlayerWalk playerState { get; private set; } = PlayerWalk.STATIC_1;
         public PlayerJump playerJumpState { get; private set; } = PlayerJump.J1;
+        public List<ItemType> inventory = new List<ItemType>();
 
         public float jumpTime { get; private set; } = 0;
         public float moveSpeed { get; private set; } = 300;
@@ -91,6 +93,7 @@ namespace PlatformBuilder.GameObjects
                     Box b = (Box)gameData.boxs[i];
                     if(b.Active())
                     {
+                        inventory.Add(b.item);
                         gameData.boxs[i] = b;
                     }
                 }
@@ -202,40 +205,41 @@ namespace PlatformBuilder.GameObjects
             {
                 if (Utils.AABB(this.GetStaticPosition(this.getPositionHitBox(velocity)), this.getSizeHitBox(), gameData.blocks[i].position, gameData.blocks[i].size))
                 {
-
-                    Direction[] dir = Utils.AABBDirection(this.GetStaticPosition(this.getPositionHitBox(velocity)), this.getSizeHitBox(), gameData.blocks[i].position, gameData.blocks[i].size);
-                    if (y)
+                    Block b = (Block)gameData.blocks[i];
+                    if (b.type == BlockType.BORDER)
                     {
-                        if (dir[0] == Direction.TOP)
-                        {
-                            Block b = (Block)gameData.blocks[i];
-                            if(b.type == BlockType.BORDER)
-                            {
-                                this.life = 0;
-                                this.isAlive = false;
-                                this.OnDestroy(this, new EventArgs());
-                            }
-                            velocity.Y -= deltatime * this.jumpSpeed; //Math.Abs(gameData.blocks[i].position.Y - (this.GetStaticPosition(this.getPositionHitBox(velocity)).Y + this.getSizeHitBox().Y)) + 1;
-                            canJump = true;
-                        }
-                        else if (dir[0] == Direction.BOTTOM)
-                        {
-                            velocity.Y += deltatime * this.jumpSpeed;// Math.Abs((gameData.blocks[i].position.Y + gameData.blocks[i].size.Y) - this.GetStaticPosition(this.getPositionHitBox(velocity)).Y);
-                        }
+                        this.life = 0;
+                        this.isAlive = false;
+                        this.OnDestroy(this, new EventArgs());
                     }
                     else
                     {
-                        if (dir[1] == Direction.RIGHT)
+                        Direction[] dir = Utils.AABBDirection(this.GetStaticPosition(this.getPositionHitBox(velocity)), this.getSizeHitBox(), gameData.blocks[i].position, gameData.blocks[i].size);
+                        if (y)
                         {
-                            velocity.X += Math.Abs((gameData.blocks[i].position.X + gameData.blocks[i].size.X) - this.GetStaticPosition(this.getPositionHitBox(velocity)).X);
+                            if (dir[0] == Direction.TOP)
+                            {
+
+                                velocity.Y -= deltatime * this.jumpSpeed; //Math.Abs(gameData.blocks[i].position.Y - (this.GetStaticPosition(this.getPositionHitBox(velocity)).Y + this.getSizeHitBox().Y)) + 1;
+                                canJump = true;
+                            }
+                            else if (dir[0] == Direction.BOTTOM)
+                            {
+                                velocity.Y += deltatime * this.jumpSpeed;// Math.Abs((gameData.blocks[i].position.Y + gameData.blocks[i].size.Y) - this.GetStaticPosition(this.getPositionHitBox(velocity)).Y);
+                            }
                         }
-                        else if (dir[1] == Direction.LEFT)
+                        else
                         {
-                            velocity.X -= Math.Abs(gameData.blocks[i].position.X - (this.GetStaticPosition(this.getPositionHitBox(velocity)).X + this.getSizeHitBox().X));
+                            if (dir[1] == Direction.RIGHT)
+                            {
+                                velocity.X += Math.Abs((gameData.blocks[i].position.X + gameData.blocks[i].size.X) - this.GetStaticPosition(this.getPositionHitBox(velocity)).X);
+                            }
+                            else if (dir[1] == Direction.LEFT)
+                            {
+                                velocity.X -= Math.Abs(gameData.blocks[i].position.X - (this.GetStaticPosition(this.getPositionHitBox(velocity)).X + this.getSizeHitBox().X));
+                            }
                         }
                     }
-
-
                 }
             }
 

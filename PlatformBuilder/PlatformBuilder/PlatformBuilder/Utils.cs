@@ -122,6 +122,33 @@ namespace PlatformBuilder.GameObjects
             spriteBatch.Draw(_pointTexture, new Rectangle(rectangle.X, rectangle.Y + rectangle.Height, rectangle.Width + lineWidth, lineWidth), color);
         }
 
+        private static Texture2D _lineTexture;
+        public static void DrawLine(SpriteBatch sb, Vector2 start, Vector2 end,Color c)
+        {
+            if (_lineTexture == null)
+            {
+                _lineTexture = new Texture2D(sb.GraphicsDevice, 1, 1);
+                _lineTexture.SetData<Color>(new Color[] { Color.White });
+            }
+            Vector2 edge = end - start;
+            float angle =
+                (float)Math.Atan2(edge.Y, edge.X);
+
+
+            sb.Draw(_lineTexture,
+                new Rectangle(
+                    (int)start.X,
+                    (int)start.Y,
+                    (int)edge.Length(),
+                    1),
+                null,
+                c,
+                angle,
+                new Vector2(0, 0),
+                SpriteEffects.None,
+                0);
+        }
+
         public static void DrawGrid(SpriteBatch spriteBatch,Vector2 size,Color color,int lineWidth)
         {
             if (_pointTexture == null)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -13,13 +14,15 @@ namespace PlatformBuilder.GameObjects
         private int state = 0;
         private float animationDuration = 200;
         private float animationTime;
+        public ItemType item { get; private set; }
 
-        public Box(Vector2 winSize,Vector2 position) : base(winSize)
+        public Box(Vector2 winSize,Vector2 position,ItemType item = ItemType.NONE) : base(winSize)
         {
             this.size = new Vector2(100,100);
             this.position = position;
             this.camera.size = this.size;
             this.camera.position = position;
+            this.item = item;
         }
 
         public bool Active()
@@ -60,4 +63,5 @@ namespace PlatformBuilder.GameObjects
             return true;
         }
     }
+
 }
