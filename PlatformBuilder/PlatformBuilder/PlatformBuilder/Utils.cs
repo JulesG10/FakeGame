@@ -200,12 +200,12 @@ namespace PlatformBuilder.GameObjects
         }
 
 
-        public static void ProceduralBlockGenerator(ref GameData gameData,Vector2 mapSize)
+        public static void ProceduralBlockGenerator(ref GameData gameData,Vector2 mapSize,int startX = 0)
         {
             PerlinNoise perlinNoise = new PerlinNoise();
             perlinNoise.SetDetail(10, 0.5);
-            Vector2[] blocks = perlinNoise.Generate2D(mapSize, 1, 0, 0.01, 0.05, 20);
-
+            Vector2[] blocks = perlinNoise.Generate2D(mapSize, 1, startX, 0.01, 0.05, 20);
+            double maxY = (gameData.windowSize.Y / 2 + (MainGame.tileSize * 20));
             Vector2 last = new Vector2(-1, -1);
             for (int i = 0; i < blocks.Length; i++)
             {
@@ -214,13 +214,16 @@ namespace PlatformBuilder.GameObjects
                 {
                     last = pos;
                 }
-
-                gameData.blocks.Add(new Block(gameData.windowSize, pos, BlockType.GROUND));
-                for(int k = 1;k<4;k++)
+                if (gameData.blocks.Count == 0 || gameData.blocks[gameData.blocks.Count-1].position.X != pos.X)
                 {
-                    gameData.blocks.Add(new Block(gameData.windowSize, new Vector2(pos.X, pos.Y + k * MainGame.tileSize), BlockType.FILL_GROUND));
+                    gameData.blocks.Add(new Block(gameData.windowSize, pos, BlockType.GROUND));
+                    for (int k = (int)(pos.Y + MainGame.tileSize); k < maxY; k += MainGame.tileSize)
+                    {
+                        gameData.blocks.Add(new Block(gameData.windowSize, new Vector2(pos.X, k), BlockType.FILL_GROUND));
+                    }
                 }
-
+               
+                
                 //Utils.DrawRectangle(MainGame.tileSize, Utils.ToRectangle(pos, new Vector2(MainGame.tileSize, MainGame.tileSize)), Color.Green, 1);
                 last = pos;
             }

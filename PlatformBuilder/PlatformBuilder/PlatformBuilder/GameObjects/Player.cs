@@ -157,12 +157,12 @@ namespace PlatformBuilder.GameObjects
             }
         }
 
-        private Vector2 getPositionHitBox(Vector2 position)
+        public Vector2 getPositionHitBox(Vector2 position)
         {
             return new Vector2(position.X + (this.size.X - this.getSizeHitBox().X) / 2, position.Y);
         }
 
-        private Vector2 getSizeHitBox()
+        public Vector2 getSizeHitBox()
         {
             return new Vector2(40, 200);
         }

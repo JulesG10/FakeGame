@@ -43,12 +43,12 @@ namespace PlatformBuilder
 
             //Utils.RandomBlockGenerator(ref gameData, -200, 200);
             Utils.ProceduralBlockGenerator(ref gameData, windowSize);
-            gameData.player.camera.position = gameData.blocks[0].position;//new Vector2(gameData.blocks[0].position.X, gameData.blocks[0].position.Y - gameData.player.size.Y*2);
-
-            for (int i = -200; i < 200; i++)
+            gameData.player.camera.position = new Vector2(-tileSize,-tileSize*20);// Vector2(gameData.blocks[0].position.X, gameData.blocks[0].position.Y - gameData.player.size.Y*2);
+          
+            /*for (int i = -200; i < 200; i++)
             {
                 gameData.blocks.Add(new Block(gameData.windowSize, new Vector2(i * MainGame.tileSize, (gameData.windowSize.Y / 2 + (MainGame.tileSize * 20))), BlockType.BORDER));
-            }
+            }*/
 
         }
 
@@ -93,6 +93,7 @@ namespace PlatformBuilder
         }
 
         private double rightPress = 0;
+        private int generated = 1;
 
         protected override void Update(GameTime gameTime)
         {
@@ -120,6 +121,12 @@ namespace PlatformBuilder
             {
                 this.gameData.player.Update(deltatime, this.gameData);
                 Utils.ListUpdate(this.gameData.boxs, deltatime, this.gameData);
+                double playerX = gameData.player.GetStaticPosition(gameData.player.getPositionHitBox(this.gameData.player.camera.position)).X;
+                if (playerX + tileSize * 5 > this.gameData.blocks[gameData.blocks.Count - 1].position.X)
+                {
+                    Utils.ProceduralBlockGenerator(ref gameData, this.gameData.windowSize, (int)(this.gameData.windowSize.X * this.generated) + MainGame.tileSize);
+                    this.generated++;
+                }
             }
 
             this.MaxDelta = Math.Max(this.MaxDelta, deltatime);
