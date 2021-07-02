@@ -117,12 +117,17 @@ namespace PlatformBuilder
                 rightPress = 0;
             }
 
+           
+
             if (gameData.player.isAlive)
             {
                 this.gameData.player.Update(deltatime, this.gameData);
                 Utils.ListUpdate(this.gameData.boxs, deltatime, this.gameData);
+                
                 double playerX = gameData.player.GetStaticPosition(gameData.player.getPositionHitBox(this.gameData.player.camera.position)).X;
-                if (playerX + tileSize * 5 > this.gameData.blocks[gameData.blocks.Count - 1].position.X)
+                int reloadDistance = ((int)(gameData.windowSize.X / 2) / MainGame.tileSize);
+
+                if (playerX + tileSize * reloadDistance > this.gameData.blocks[gameData.blocks.Count - 1].position.X)
                 {
                     Utils.ProceduralBlockGenerator(ref gameData, this.gameData.windowSize, (int)(this.gameData.windowSize.X * this.generated) + MainGame.tileSize);
                     this.generated++;

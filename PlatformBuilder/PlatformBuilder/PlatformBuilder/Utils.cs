@@ -204,9 +204,13 @@ namespace PlatformBuilder.GameObjects
         {
             PerlinNoise perlinNoise = new PerlinNoise();
             perlinNoise.SetDetail(10, 0.5);
+
             Vector2[] blocks = perlinNoise.Generate2D(mapSize, 1, startX, 0.01, 0.05, 20);
             double maxY = (gameData.windowSize.Y / 2 + (MainGame.tileSize * 20));
             Vector2 last = new Vector2(-1, -1);
+
+            Random rnd = new Random();
+
             for (int i = 0; i < blocks.Length; i++)
             {
                 Vector2 pos = new Vector2(((int)(blocks[i].X / MainGame.tileSize) * MainGame.tileSize), ((int)(blocks[i].Y / MainGame.tileSize) * MainGame.tileSize));
@@ -217,6 +221,19 @@ namespace PlatformBuilder.GameObjects
                 if (gameData.blocks.Count == 0 || gameData.blocks[gameData.blocks.Count-1].position.X != pos.X)
                 {
                     gameData.blocks.Add(new Block(gameData.windowSize, pos, BlockType.GROUND));
+
+                    if(rnd.Next(0,50) == 0)
+                    {
+                        gameData.boxs.Add(new Box(gameData.windowSize, new Vector2(pos.X, pos.Y - 90)));
+                    }
+
+                    if (rnd.Next(0, 20) == 0)
+                    {
+                        gameData.items.Add(new Item(gameData.windowSize, new Vector2(pos.X, pos.Y - 25), ItemType.ROCK_BLOCK));
+                    }
+
+
+
                     for (int k = (int)(pos.Y + MainGame.tileSize); k < maxY; k += MainGame.tileSize)
                     {
                         gameData.blocks.Add(new Block(gameData.windowSize, new Vector2(pos.X, k), BlockType.FILL_GROUND));
@@ -224,7 +241,7 @@ namespace PlatformBuilder.GameObjects
                 }
                
                 
-                //Utils.DrawRectangle(MainGame.tileSize, Utils.ToRectangle(pos, new Vector2(MainGame.tileSize, MainGame.tileSize)), Color.Green, 1);
+                
                 last = pos;
             }
         }
