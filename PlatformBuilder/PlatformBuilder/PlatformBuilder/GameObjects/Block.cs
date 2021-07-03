@@ -8,6 +8,7 @@ namespace PlatformBuilder.GameObjects
 {
     enum BlockType
     {
+        NONE,
         GROUND,
         GROUND_NO_GRASS,
         GROUND_END_LEFT,
@@ -19,6 +20,8 @@ namespace PlatformBuilder.GameObjects
     class Block : Object
     {
         public BlockType type;
+        public bool active = false;
+
 
         public Block(Vector2 winSize, Vector2 position, BlockType type) : base(winSize)
         {
@@ -27,6 +30,7 @@ namespace PlatformBuilder.GameObjects
             this.position = position;
             this.camera.size = this.size;
             this.camera.position = position;
+            
         }
 
 
@@ -37,9 +41,20 @@ namespace PlatformBuilder.GameObjects
 
         public override bool Draw(SpriteBatch spriteBatch, GraphicsDeviceManager graphicsDeviceManager, Camera mainCamera, GameData gameData)
         {
-            if (base.Draw(spriteBatch, graphicsDeviceManager, mainCamera, gameData))
+            if (base.Draw(spriteBatch, graphicsDeviceManager, mainCamera, gameData) && this.type != BlockType.NONE)
             {
-                spriteBatch.Draw(gameData.groundTextures[(int)this.type], Utils.ToRectangle(this.GetPosition(mainCamera), this.size), Color.White);
+
+                spriteBatch.Draw(gameData.groundTextures[(int)this.type - 1], Utils.ToRectangle(this.GetPosition(mainCamera), this.size), Color.White);
+                if (active)
+                {
+                    Utils.DrawRectangle(spriteBatch, Utils.ToRectangle(this.GetPosition(mainCamera), this.size), Color.Red, 1);
+                    active = false;
+                }
+                else
+                {
+                    spriteBatch.Draw(gameData.groundTextures[(int)this.type - 1], Utils.ToRectangle(this.GetPosition(mainCamera), this.size), Color.White);
+                }
+                
                 return true;
             }
            

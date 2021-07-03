@@ -106,6 +106,12 @@ namespace PlatformBuilder.GameObjects
         public static Direction[] AABBDirection(Vector2 p1, Vector2 s1, Vector2 p2, Vector2 s2)
         {
             Direction[] dir = { Direction.NONE,Direction.NONE };
+            if(!Utils.AABB(p1,s1,p2,s2))
+            {
+                return dir;
+            }
+
+            
             float p1b = p1.Y + s1.Y;
             float p2b = p2.Y + s2.Y;
 

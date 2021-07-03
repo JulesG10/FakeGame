@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-
 
 namespace PlatformBuilder.GameObjects
 {
@@ -38,7 +38,9 @@ namespace PlatformBuilder.GameObjects
         public PlayerJumpStates jumpStates { get; private set; } = PlayerJumpStates.BOTTOM;
         public PlayerWalk playerState { get; private set; } = PlayerWalk.STATIC_1;
         public PlayerJump playerJumpState { get; private set; } = PlayerJump.J1;
-        public List<ItemType> inventory = new List<ItemType>();
+        public List<ItemType> inventory { get; private set; } = new List<ItemType>();
+        public Dictionary<int, Direction> collisionBlockList { get; private set; } = new Dictionary<int, Direction>();
+        public Direction blockActionDir { get; private set; }  = Direction.TOP;
 
         public float jumpTime { get; private set; } = 0;
         public float moveSpeed { get; private set; } = 300;
@@ -51,6 +53,9 @@ namespace PlatformBuilder.GameObjects
         public float life { get; private set; } = 100.0f;
         public bool canJump { get; private set; } = false;
         public bool isAlive { get; private set; } = true;
+        public double Wpress { get; private set; } = 0;
+        public double Xpress { get; private set; } = 0;
+        public int marginValue { get; private set; } = 0;
 
         public Player(Vector2 winSize) : base(winSize)
         {
@@ -74,19 +79,124 @@ namespace PlatformBuilder.GameObjects
                 velocity.X += deltatime * moveSpeed;
             }
 
+            if(this.blockActionDir == Direction.LEFT ||this.blockActionDir == Direction.RIGHT)
+            {
+                this.blockActionDir = this.playerDirection == Direction.LEFT ? Direction.RIGHT : Direction.LEFT;
+            }
+
+            /* test
             if (Keyboard.GetState().IsKeyDown(Keys.Up))
             {
                 velocity.Y -= deltatime * jumpSpeed*2;
             }
+            */
 
+            collisionBlockList.Clear();
+
+            this.GetCollisionBlock(gameData, velocity, false);
             this.CheckBlockCollision(deltatime, gameData, ref velocity, false);
+            
             this.JumpAction(deltatime, ref velocity);
+
+            this.GetCollisionBlock(gameData, velocity , true);
             this.CheckBlockCollision(deltatime, gameData, ref velocity, true);
+
             this.UpdateState(velocity, gameData);
             this.ItemAction(velocity, gameData);
 
+            this.BlockAction(gameData,deltatime);
+
             this.camera.position = velocity;
             base.Update(deltatime, gameData);
+        }
+
+
+
+        private void BlockAction(GameData gameData,float deltatime)
+        {
+            /* test
+            foreach (KeyValuePair<int, Direction> item in collisionBlockList)
+            {
+                if(item.Value == this.blockActionDir)
+                {
+                    Block b = (Block)gameData.blocks[item.Key];
+                    b.active = true;
+                }
+               
+            }
+            */
+
+            if (Keyboard.GetState().IsKeyDown(Keys.W))
+            {
+                Wpress += deltatime * 1000;
+                if(Wpress > 200)
+                {
+                    Wpress = 0;
+                    if(blockActionDir == Direction.TOP)
+                    {
+                        blockActionDir = Direction.BOTTOM;
+                    }else if(blockActionDir == Direction.BOTTOM)
+                    {
+                        blockActionDir = this.playerDirection == Direction.LEFT ? Direction.RIGHT : Direction.LEFT;
+                    }else if(blockActionDir == Direction.LEFT || blockActionDir == Direction.RIGHT)
+                    {
+                        blockActionDir = Direction.TOP;
+                    }
+                }
+            }
+
+            if(Keyboard.GetState().IsKeyDown(Keys.X))
+            {
+                Xpress += deltatime * 1000;
+                if (Xpress > 200)
+                {
+                    Xpress = 0;
+                    if (collisionBlockList.ContainsValue(this.blockActionDir))
+                    {
+                        foreach (KeyValuePair<int, Direction> item in collisionBlockList)
+                        {
+                            if (item.Value == this.blockActionDir)
+                            {
+                                Block b = (Block)gameData.blocks[item.Key];
+                                b.type = BlockType.NONE;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        private void  GetCollisionBlock(GameData gameData,Vector2 velocity,bool y)
+        {
+            int count = 0;
+            int max = y ? 2 : (int)this.size.Y / MainGame.tileSize;
+            for(int i = 0;i< gameData.blocks.Count;i++)
+            {
+                if (count > max)
+                {
+                    break;
+                }
+
+                Direction[] dir = Utils.AABBDirection(this.GetStaticPosition(this.getPositionHitBox(velocity)), this.getSizeHitBox(), gameData.blocks[i].position, gameData.blocks[i].size);
+                if ((dir[0] != Direction.NONE || dir[1] != Direction.NONE) && !collisionBlockList.ContainsKey(i))
+                {
+                    count++;
+                    collisionBlockList.Add(i, dir[y ? 0 : 1]);
+                    if (!y && !collisionBlockList.ContainsKey(i + 1) && !collisionBlockList.ContainsKey(i - 1))
+                    {
+                        if(gameData.blocks[i-1].position.Y == gameData.blocks[i].position.Y - MainGame.tileSize)
+                        {
+                            Block b = (Block)gameData.blocks[i - 1];
+                            if(b.type != BlockType.NONE)
+                            {
+                                collisionBlockList.Add(i + 1, dir[y ? 0 : 1]);
+                            }
+                            
+                        }
+                        
+                    }
+                }
+            }
         }
 
         private void ItemAction(Vector2 velocity, GameData gameData)
@@ -164,7 +274,7 @@ namespace PlatformBuilder.GameObjects
 
         public Vector2 getSizeHitBox()
         {
-            return new Vector2(40, 200);
+            return new Vector2(40, 198);
         }
 
 
@@ -206,12 +316,24 @@ namespace PlatformBuilder.GameObjects
 
         private void CheckBlockCollision(float deltatime, GameData gameData, ref Vector2 velocity, bool y)
         {
+            int collisionCount = 0;
             for (int i = 0; i < gameData.blocks.Count; i++)
             {
+                if(collisionCount >= 6)
+                {
+                    break;
+                }
+
                 if (Utils.AABB(this.GetStaticPosition(this.getPositionHitBox(velocity)), this.getSizeHitBox(), gameData.blocks[i].position, gameData.blocks[i].size))
                 {
+                    collisionCount++;
                     Block b = (Block)gameData.blocks[i];
-                    if (b.type == BlockType.BORDER)
+
+                    if(b.type == BlockType.NONE)
+                    {
+
+                    }
+                    else if (b.type == BlockType.BORDER)
                     {
                         this.life = 0;
                         this.isAlive = false;
@@ -219,14 +341,25 @@ namespace PlatformBuilder.GameObjects
                     }
                     else
                     {
+
                         Direction[] dir = Utils.AABBDirection(this.GetStaticPosition(this.getPositionHitBox(velocity)), this.getSizeHitBox(), gameData.blocks[i].position, gameData.blocks[i].size);
                         if (y)
                         {
                             if (dir[0] == Direction.TOP)
                             {
-
+                                if(b.type == BlockType.GROUND)
+                                {
+                                    this.marginValue = 5;
+                                }
+                                else
+                                {
+                                    this.marginValue = 0;
+                                }
                                 velocity.Y -= deltatime * this.jumpSpeed; //Math.Abs(gameData.blocks[i].position.Y - (this.GetStaticPosition(this.getPositionHitBox(velocity)).Y + this.getSizeHitBox().Y)) + 1;
-                                canJump = true;
+                                if (this.jumpStates != PlayerJumpStates.TOP)
+                                {
+                                    canJump = true;
+                                }
                             }
                             else if (dir[0] == Direction.BOTTOM)
                             {
@@ -237,11 +370,11 @@ namespace PlatformBuilder.GameObjects
                         {
                             if (dir[1] == Direction.RIGHT)
                             {
-                                velocity.X += Math.Abs((gameData.blocks[i].position.X + gameData.blocks[i].size.X) - this.GetStaticPosition(this.getPositionHitBox(velocity)).X);
+                                velocity.X += deltatime * this.moveSpeed;//Math.Abs((gameData.blocks[i].position.X + gameData.blocks[i].size.X) - this.GetStaticPosition(this.getPositionHitBox(velocity)).X);
                             }
                             else if (dir[1] == Direction.LEFT)
                             {
-                                velocity.X -= Math.Abs(gameData.blocks[i].position.X - (this.GetStaticPosition(this.getPositionHitBox(velocity)).X + this.getSizeHitBox().X));
+                                velocity.X -= deltatime * this.moveSpeed; //Math.Abs(gameData.blocks[i].position.X - (this.GetStaticPosition(this.getPositionHitBox(velocity)).X + this.getSizeHitBox().X));
                             }
                         }
                     }
@@ -283,7 +416,7 @@ namespace PlatformBuilder.GameObjects
 
         public override bool Draw(SpriteBatch spriteBatch, GraphicsDeviceManager graphicsDeviceManager, Camera mainCamera, GameData gameData)
         {
-            spriteBatch.Draw(this.getDrawTexture(gameData), this.MarginEffect(5), Color.White);// Utils.ToRectangle(this.position, this.size), Color.White);
+            spriteBatch.Draw(this.getDrawTexture(gameData), this.MarginEffect(this.marginValue), Color.White);
             return true;
         }
     }
