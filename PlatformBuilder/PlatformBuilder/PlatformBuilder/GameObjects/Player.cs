@@ -370,11 +370,13 @@ namespace PlatformBuilder.GameObjects
                         {
                             if (dir[1] == Direction.RIGHT)
                             {
-                                velocity.X += deltatime * this.moveSpeed;//Math.Abs((gameData.blocks[i].position.X + gameData.blocks[i].size.X) - this.GetStaticPosition(this.getPositionHitBox(velocity)).X);
+                                velocity.X += Math.Abs((gameData.blocks[i].position.X + gameData.blocks[i].size.X) - this.GetStaticPosition(this.getPositionHitBox(velocity)).X);
+                                // deltatime * this.moveSpeed;
                             }
                             else if (dir[1] == Direction.LEFT)
                             {
-                                velocity.X -= deltatime * this.moveSpeed; //Math.Abs(gameData.blocks[i].position.X - (this.GetStaticPosition(this.getPositionHitBox(velocity)).X + this.getSizeHitBox().X));
+                                velocity.X -= Math.Abs(gameData.blocks[i].position.X - (this.GetStaticPosition(this.getPositionHitBox(velocity)).X + this.getSizeHitBox().X));
+                                //deltatime * this.moveSpeed;
                             }
                         }
                     }
